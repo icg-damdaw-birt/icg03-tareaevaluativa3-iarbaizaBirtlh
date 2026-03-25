@@ -27,6 +27,7 @@ model Movie {
   director  String                         // Director
   year      Int                            // Año de estreno
   posterUrl String?                        // URL del póster (opcional)
+  rating    Int      @default(0)
   
   // Campos que se añadirán en UD3:
   // - isFavorite Boolean @default(false)  // Favoritos (UD3 - guiado)
