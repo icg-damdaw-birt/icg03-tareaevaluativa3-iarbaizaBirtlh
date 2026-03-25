@@ -103,3 +103,40 @@ exports.deleteMovie = async (req, res) => {
     res.status(500).json({ error: 'No se pudo eliminar la película' });
   }
 };
+
+exports.updateRating = async (req, res) => {
+  try {
+    const { id } = req.params;           // ID de la película
+    const { rating } = req.body;         // Rating enviado por el cliente
+    const userId = req.user.userId;      // ID del usuario autenticado (proporcionado por el middleware)
+
+    // ✅ VALIDACIÓN
+    if (rating === undefined || typeof rating !== 'number' || rating < 0 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 0 and 5' });
+    }
+
+    // ✅ BUSCAR LA PELÍCULA Y VERIFICAR PROPIEDAD
+    const movie = await prisma.movie.findFirst({
+      where: {
+        id: id,         // Ajusta si tu id es Int o String en Prisma
+        ownerId: userId // Ajusta el campo según tu modelo (userId o ownerId)
+      }
+    });
+
+    if (!movie) {
+      return res.status(404).json({ error: 'Movie not found' });
+    }
+
+    // ✅ ACTUALIZAR EL RATING
+    const updatedMovie = await prisma.movie.update({
+      where: { id: movie.id },
+      data: { rating }
+    });
+
+    return res.status(200).json(updatedMovie);
+
+  } catch (error) {
+    console.error('Error updating rating:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
